@@ -36,21 +36,13 @@ npm run dev          # → http://localhost:3000
 
 > ⚠️ 初回や新規作業がある日は `claude -p` 要約に数十秒〜数分かかることがある（裏で実行・完了後に反映）。
 
-## ブログ記事（持ち込み）
+## ブログ記事
 
 記事はダッシュボードで生成しない。Claude Code 側で作成して保存する：
 - Claude Code から `/blog "質問内容"` を実行（`.claude/commands/blog.md`）。Claude 自身が記事を書き、
   `POST /api/posts {slug, content}` または `posts/{slug}.md` 直接書き込みで保存する。
 - ダッシュボードの「ブログ記事」タブで表示・削除のみ。
 
-## （任意）過去の Notion 履歴の取り込み
-
-旧 claude-notion-logger が Notion に貯めた過去ログを一度だけ取り込みたい場合のみ：
-```bash
-# NOTION_TOKEN / NOTION_DATABASE_ID を export してから
-npm run import-notion
-```
-（通常運用には不要。`lib/notion.ts` の COLUMN_MAP が実DBスキーマに対応。）
 
 ## API
 
