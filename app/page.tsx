@@ -18,6 +18,7 @@ const TABS: { key: Tab; label: string }[] = [
 export default function Home() {
   const [tab, setTab] = useState<Tab>('logs');
   const [unreadPosts, setUnreadPosts] = useState(0);
+  const [openTasks, setOpenTasks] = useState(0);
 
   // ブログ未読数。初回はここで算出（PostsPanel 未マウントでもバッジを出すため）、
   // 以降は PostsPanel が既読変更時に飛ばすイベントで同期する。
@@ -48,6 +49,28 @@ export default function Home() {
     };
   }, []);
 
+  // 未完了タスク数。初回はここで算出（TasksPanel 未マウントでもバッジを出すため）、
+  // 以降は TasksPanel が変更時に飛ばすイベントで同期する。
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/tasks');
+        const tasks: { done: boolean }[] = await res.json();
+        if (!cancelled) setOpenTasks(tasks.filter((t) => !t.done).length);
+      } catch {
+        /* ignore */
+      }
+    })();
+
+    const onOpen = (e: Event) => setOpenTasks((e as CustomEvent<number>).detail);
+    window.addEventListener('ccd-tasks-open', onOpen);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('ccd-tasks-open', onOpen);
+    };
+  }, []);
+
   return (
     <main>
       <nav className="tabs">
@@ -60,6 +83,9 @@ export default function Home() {
             {t.label}
             {t.key === 'posts' && unreadPosts > 0 && (
               <span className="tab-badge">{unreadPosts > 99 ? '99+' : unreadPosts}</span>
+            )}
+            {t.key === 'tasks' && openTasks > 0 && (
+              <span className="tab-badge">{openTasks > 99 ? '99+' : openTasks}</span>
             )}
           </button>
         ))}

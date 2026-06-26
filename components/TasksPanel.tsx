@@ -22,6 +22,12 @@ export default function TasksPanel() {
     load();
   }, []);
 
+  // 未完了タスク数をタブのバッジ（page.tsx）へ通知。tasks が変わるたび発火。
+  useEffect(() => {
+    const openCount = tasks.filter((t) => !t.done).length;
+    window.dispatchEvent(new CustomEvent('ccd-tasks-open', { detail: openCount }));
+  }, [tasks]);
+
   async function add() {
     if (!title.trim()) return;
     await fetch('/api/tasks', {
