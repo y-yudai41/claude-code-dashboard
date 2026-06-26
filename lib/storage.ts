@@ -6,6 +6,7 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const POSTS_DIR = path.join(process.cwd(), 'posts');
 const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
 const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
+const ACHIEVEMENTS_FILE = path.join(DATA_DIR, 'achievements.json');
 
 // ---- 型 ----
 // 作業ログは claude-notion-logger が Notion に書く形式と同一にする。
@@ -34,6 +35,16 @@ export interface PostMeta {
   title: string;
   date: string; // YYYY-MM-DD（ファイル名先頭から推定）
   preview: string;
+}
+
+// 成果（プロジェクト単位のサマリ）。毎日のセッションログとは別物で、
+// 「このプロジェクトで全体として何をやったか」を手動指示で書き残す。
+export interface Achievement {
+  id: string;
+  project: string; // プロジェクト名（一覧の見出し）
+  period: string; // 期間（例 2026 Q1–Q2）。任意なので空文字可。
+  body: string; // 本文（Markdown 要約）
+  createdAt: string; // ISO8601
 }
 
 // ---- 汎用 JSON 読み書き ----
@@ -75,6 +86,17 @@ export async function getTasks(): Promise<Task[]> {
 
 export async function saveTasks(tasks: Task[]): Promise<void> {
   await writeJson(TASKS_FILE, tasks);
+}
+
+// ---- 成果（プロジェクトサマリ） ----
+export async function getAchievements(): Promise<Achievement[]> {
+  const items = await readJson<Achievement[]>(ACHIEVEMENTS_FILE, []);
+  // 新しい順（createdAt 降順）
+  return [...items].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function saveAchievements(items: Achievement[]): Promise<void> {
+  await writeJson(ACHIEVEMENTS_FILE, items);
 }
 
 // ---- ブログ記事（.md ファイル） ----

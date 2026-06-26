@@ -11,6 +11,12 @@ interface PostMeta {
   preview: string;
 }
 
+// 「メインタイトル — サブタイトル」形式から、一覧表示用にメイン部分だけ取り出す。
+// em/en ダッシュ（— –）区切りのみ対象（通常のハイフンは温存）。全文はクリックで見る。
+function mainTitle(title: string): string {
+  return title.split(/\s*[—–]\s*/)[0].trim();
+}
+
 export default function PostsPanel() {
   const [posts, setPosts] = useState<PostMeta[]>([]);
   const [openSlug, setOpenSlug] = useState<string | null>(null);
@@ -32,6 +38,12 @@ export default function PostsPanel() {
       /* ignore */
     }
   }, []);
+
+  // 未読数をタブのバッジ（page.tsx）へ通知。posts/read が変わるたび再計算して飛ばす。
+  useEffect(() => {
+    const unread = posts.filter((p) => !read.includes(p.slug)).length;
+    window.dispatchEvent(new CustomEvent('ccd-posts-unread', { detail: unread }));
+  }, [posts, read]);
 
   function toggleRead(slug: string) {
     setRead((prev) => {
@@ -69,6 +81,11 @@ export default function PostsPanel() {
 
   return (
     <div>
+      <p className="hint">
+        記事はこの画面では作りません。Claude Code で <code>/blog &quot;質問内容&quot;</code> を実行すると、
+        Claude が記事を書いてここに保存します（このタブは表示・既読管理・削除のみ）。
+      </p>
+
       {posts.length > 0 && (
         <div className="tabs" style={{ marginBottom: 16 }}>
           <button
@@ -95,7 +112,12 @@ export default function PostsPanel() {
             >
               <div className="card-row">
                 <div>
-                  <div className="post-title">{post.title}</div>
+                  <div className="post-title">
+                    {!read.includes(post.slug) && (
+                      <span className="unread-dot" aria-label="未読" title="未読" />
+                    )}
+                    {mainTitle(post.title)}
+                  </div>
                   <div className="meta">{post.date}</div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
