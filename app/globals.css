@@ -227,6 +227,22 @@ textarea {
   margin-bottom: 8px;
 }
 
+.task .title {
+  /* 長押しドラッグ中の不要な範囲選択・コールアウトを抑止 */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 掴んでいる行。touch-action:none で並べ替え中のスクロールを止める */
+.task.dragging {
+  touch-action: none;
+  border-color: var(--green);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  opacity: 0.92;
+  cursor: grabbing;
+}
+
 .task input[type='checkbox'] {
   width: 16px;
   height: 16px;
@@ -241,6 +257,45 @@ textarea {
 .task.done .title {
   color: var(--text-muted);
   text-decoration: line-through;
+}
+
+/* 追加フォームのボタン行（追加 / タイトル を横並び） */
+.form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.form-actions .btn-ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* タイトル行（複数タスクをまとめる見出し）。チェックボックスは無い。 */
+.task.group {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--border);
+  border-radius: 0;
+  padding: 14px 4px 6px;
+  margin-top: 10px;
+}
+
+.task.group .title {
+  font-weight: 700;
+  font-size: 1.05em;
+  letter-spacing: 0.02em;
+}
+
+/* インライン編集の入力欄 */
+.title-edit {
+  flex: 1;
+  padding: 4px 8px;
+  background: var(--bg-base, #0d1117);
+  color: inherit;
+  border: 1px solid var(--green);
+  border-radius: 6px;
+  font: inherit;
 }
 
 /* ---- 記事 ---- */

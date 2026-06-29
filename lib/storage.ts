@@ -28,6 +28,7 @@ export interface Task {
   title: string;
   done: boolean;
   createdAt: string; // ISO8601
+  kind?: 'task' | 'group'; // 'group' は複数タスクをまとめる見出し行。未指定は 'task'（後方互換）。
 }
 
 export interface PostMeta {
