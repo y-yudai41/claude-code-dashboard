@@ -7,6 +7,7 @@ const POSTS_DIR = path.join(process.cwd(), 'posts');
 const LOGS_FILE = path.join(DATA_DIR, 'logs.json');
 const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
 const ACHIEVEMENTS_FILE = path.join(DATA_DIR, 'achievements.json');
+const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
 
 // ---- 型 ----
 // 作業ログは claude-notion-logger が Notion に書く形式と同一にする。
@@ -29,6 +30,21 @@ export interface Task {
   done: boolean;
   createdAt: string; // ISO8601
   kind?: 'task' | 'group'; // 'group' は複数タスクをまとめる見出し行。未指定は 'task'（後方互換）。
+}
+
+// Slack 風の自分宛 DM メッセージ。スレッドは parentId で表現する。
+export interface Reaction {
+  emoji: string;
+  count: number; // 自分専用なので実質 1（トグルで付け外し）
+}
+
+export interface Message {
+  id: string;
+  text: string;
+  createdAt: string; // ISO8601
+  editedAt?: string; // 編集時刻（あれば「編集済み」表示）
+  parentId?: string; // セットされていればスレッド返信。未指定はトップレベル投稿。
+  reactions?: Reaction[];
 }
 
 export interface PostMeta {
@@ -87,6 +103,17 @@ export async function getTasks(): Promise<Task[]> {
 
 export async function saveTasks(tasks: Task[]): Promise<void> {
   await writeJson(TASKS_FILE, tasks);
+}
+
+// ---- メッセージ（Slack 風 自分 DM） ----
+export async function getMessages(): Promise<Message[]> {
+  const items = await readJson<Message[]>(MESSAGES_FILE, []);
+  // 投稿順（古い→新しい）。チャットは上から時系列で読む。
+  return [...items].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+export async function saveMessages(items: Message[]): Promise<void> {
+  await writeJson(MESSAGES_FILE, items);
 }
 
 // ---- 成果（プロジェクトサマリ） ----
