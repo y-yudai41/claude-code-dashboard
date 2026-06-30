@@ -22,7 +22,9 @@ export default function PostsPanel() {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
   const [content, setContent] = useState('');
   const [read, setRead] = useState<string[]>([]);
+  const [fav, setFav] = useState<string[]>([]);
   const [unreadOnly, setUnreadOnly] = useState(false);
+  const [favOnly, setFavOnly] = useState(false);
 
   async function load() {
     const res = await fetch('/api/posts');
@@ -34,6 +36,12 @@ export default function PostsPanel() {
     try {
       const r = JSON.parse(localStorage.getItem('ccd-read-posts') || '[]');
       if (Array.isArray(r)) setRead(r);
+    } catch {
+      /* ignore */
+    }
+    try {
+      const f = JSON.parse(localStorage.getItem('ccd-fav-posts') || '[]');
+      if (Array.isArray(f)) setFav(f);
     } catch {
       /* ignore */
     }
@@ -50,6 +58,18 @@ export default function PostsPanel() {
       const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug];
       try {
         localStorage.setItem('ccd-read-posts', JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }
+
+  function toggleFav(slug: string) {
+    setFav((prev) => {
+      const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug];
+      try {
+        localStorage.setItem('ccd-fav-posts', JSON.stringify(next));
       } catch {
         /* ignore */
       }
@@ -77,7 +97,11 @@ export default function PostsPanel() {
     load();
   }
 
-  const visible = posts.filter((p) => !unreadOnly || !read.includes(p.slug));
+  const visible = posts.filter(
+    (p) =>
+      (!unreadOnly || !read.includes(p.slug)) && (!favOnly || fav.includes(p.slug)),
+  );
+  const favCount = posts.filter((p) => fav.includes(p.slug)).length;
 
   return (
     <div>
@@ -92,7 +116,13 @@ export default function PostsPanel() {
             className={`tab${unreadOnly ? ' active' : ''}`}
             onClick={() => setUnreadOnly((v) => !v)}
           >
-            {unreadOnly ? `未読のみ（${visible.length}）` : 'すべて表示'}
+            {unreadOnly ? '未読のみ' : 'すべて表示'}
+          </button>
+          <button
+            className={`tab${favOnly ? ' active' : ''}`}
+            onClick={() => setFavOnly((v) => !v)}
+          >
+            {favOnly ? `★ お気に入りのみ（${favCount}）` : `☆ お気に入り（${favCount}）`}
           </button>
         </div>
       )}
@@ -102,7 +132,9 @@ export default function PostsPanel() {
           まだ記事がありません。Claude Code で <code>/blog &quot;質問&quot;</code> を実行すると追加されます。
         </p>
       ) : visible.length === 0 ? (
-        <p className="empty">未読の記事はありません。</p>
+        <p className="empty">
+          {favOnly ? 'お気に入りの記事はありません。' : '未読の記事はありません。'}
+        </p>
       ) : (
         visible.map((post) => (
           <div key={post.slug}>
@@ -120,7 +152,19 @@ export default function PostsPanel() {
                   </div>
                   <div className="meta">{post.date}</div>
                 </div>
-                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>
+                  <button
+                    className={`btn-star${fav.includes(post.slug) ? ' active' : ''}`}
+                    aria-pressed={fav.includes(post.slug)}
+                    aria-label={fav.includes(post.slug) ? 'お気に入りから外す' : 'お気に入りに追加'}
+                    title={fav.includes(post.slug) ? 'お気に入りから外す' : 'お気に入りに追加'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFav(post.slug);
+                    }}
+                  >
+                    {fav.includes(post.slug) ? '★' : '☆'}
+                  </button>
                   <button
                     className="btn-ghost"
                     onClick={(e) => {

@@ -320,6 +320,27 @@ textarea {
   font-size: 15px;
 }
 
+/* お気に入りの星ボタン */
+.btn-star {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+  transition: color 0.12s, transform 0.12s;
+}
+
+.btn-star:hover {
+  color: #e3b341;
+  transform: scale(1.15);
+}
+
+.btn-star.active {
+  color: #e3b341;
+}
+
 .unread-dot {
   display: inline-block;
   width: 8px;
