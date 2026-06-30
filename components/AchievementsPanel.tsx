@@ -30,6 +30,7 @@ export default function AchievementsPanel() {
   }
 
   async function remove(id: string) {
+    if (!confirm('この成果を削除しますか？')) return;
     await fetch('/api/achievements', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },

@@ -96,6 +96,16 @@ export async function saveLogs(logs: LogEntry[]): Promise<void> {
   await writeJson(LOGS_FILE, logs);
 }
 
+// ログを1件削除。次回 collect でその日の signature が変わらなければ復活しない
+// （変化があった日は再収集で作り直されるため戻りうる）。
+export async function deleteLog(id: string): Promise<void> {
+  const logs = await readJson<LogEntry[]>(LOGS_FILE, []);
+  await writeJson(
+    LOGS_FILE,
+    logs.filter((l) => l.id !== id),
+  );
+}
+
 // ---- タスク ----
 export async function getTasks(): Promise<Task[]> {
   return readJson<Task[]>(TASKS_FILE, []);

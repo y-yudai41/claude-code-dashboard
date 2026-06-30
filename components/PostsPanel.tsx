@@ -88,6 +88,9 @@ export default function PostsPanel() {
   }
 
   async function remove(slug: string) {
+    if (!confirm('この記事を削除しますか？\n（Claude Code が保存した .md ファイルごと削除されます）')) {
+      return;
+    }
     await fetch('/api/posts', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
