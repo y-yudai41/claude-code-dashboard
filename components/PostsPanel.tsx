@@ -23,8 +23,8 @@ export default function PostsPanel() {
   const [content, setContent] = useState('');
   const [read, setRead] = useState<string[]>([]);
   const [fav, setFav] = useState<string[]>([]);
-  const [unreadOnly, setUnreadOnly] = useState(false);
-  const [favOnly, setFavOnly] = useState(false);
+  // 表示フィルタは3択の単一選択（すべて / お気に入り / 未読）。1箇所で切り替える。
+  const [filter, setFilter] = useState<'all' | 'fav' | 'unread'>('all');
 
   async function load() {
     const res = await fetch('/api/posts');
@@ -100,11 +100,13 @@ export default function PostsPanel() {
     load();
   }
 
-  const visible = posts.filter(
-    (p) =>
-      (!unreadOnly || !read.includes(p.slug)) && (!favOnly || fav.includes(p.slug)),
-  );
+  const visible = posts.filter((p) => {
+    if (filter === 'fav') return fav.includes(p.slug);
+    if (filter === 'unread') return !read.includes(p.slug);
+    return true; // 'all'
+  });
   const favCount = posts.filter((p) => fav.includes(p.slug)).length;
+  const unreadCount = posts.filter((p) => !read.includes(p.slug)).length;
 
   return (
     <div>
@@ -116,16 +118,25 @@ export default function PostsPanel() {
       {posts.length > 0 && (
         <div className="tabs" style={{ marginBottom: 16 }}>
           <button
-            className={`tab${unreadOnly ? ' active' : ''}`}
-            onClick={() => setUnreadOnly((v) => !v)}
+            className={`tab${filter === 'all' ? ' active' : ''}`}
+            aria-pressed={filter === 'all'}
+            onClick={() => setFilter('all')}
           >
-            {unreadOnly ? '未読のみ' : 'すべて表示'}
+            すべて表示
           </button>
           <button
-            className={`tab${favOnly ? ' active' : ''}`}
-            onClick={() => setFavOnly((v) => !v)}
+            className={`tab${filter === 'fav' ? ' active' : ''}`}
+            aria-pressed={filter === 'fav'}
+            onClick={() => setFilter('fav')}
           >
-            {favOnly ? `★ お気に入りのみ（${favCount}）` : `☆ お気に入り（${favCount}）`}
+            ★ お気に入り（{favCount}）
+          </button>
+          <button
+            className={`tab${filter === 'unread' ? ' active' : ''}`}
+            aria-pressed={filter === 'unread'}
+            onClick={() => setFilter('unread')}
+          >
+            未読（{unreadCount}）
           </button>
         </div>
       )}
@@ -136,7 +147,7 @@ export default function PostsPanel() {
         </p>
       ) : visible.length === 0 ? (
         <p className="empty">
-          {favOnly ? 'お気に入りの記事はありません。' : '未読の記事はありません。'}
+          {filter === 'fav' ? 'お気に入りの記事はありません。' : '未読の記事はありません。'}
         </p>
       ) : (
         visible.map((post) => (

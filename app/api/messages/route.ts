@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(message, { status: 201 });
 }
 
-// PATCH /api/messages — 編集 { id, text } / リアクション { id, toggleReaction }
+// PATCH /api/messages — 編集 { id, text }
 export async function PATCH(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body.id !== 'string') {
@@ -52,18 +52,6 @@ export async function PATCH(req: NextRequest) {
   if (typeof body.text === 'string' && body.text.trim() !== '') {
     message.text = body.text.trim();
     message.editedAt = new Date().toISOString();
-  }
-  // リアクションのトグル（自分専用なので付いていれば外す・無ければ付ける）
-  if (typeof body.toggleReaction === 'string' && body.toggleReaction) {
-    const emoji = body.toggleReaction;
-    const reactions = message.reactions ?? [];
-    const idx = reactions.findIndex((r) => r.emoji === emoji);
-    if (idx >= 0) {
-      reactions.splice(idx, 1);
-    } else {
-      reactions.push({ emoji, count: 1 });
-    }
-    message.reactions = reactions;
   }
   await saveMessages(messages);
   return NextResponse.json(message);

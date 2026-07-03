@@ -2,21 +2,13 @@
 
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 
-interface Reaction {
-  emoji: string;
-  count: number;
-}
-
 interface Message {
   id: string;
   text: string;
   createdAt: string;
   editedAt?: string;
   parentId?: string;
-  reactions?: Reaction[];
 }
-
-const QUICK_EMOJIS = ['👍', '✅', '👀', '🙏', '🎉', '❤️', '😄', '🔥'];
 
 // ---- 日時フォーマット（Slack 風） ----
 function fmtTime(iso: string): string {
@@ -252,7 +244,6 @@ export default function DmPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [openThreadId, setOpenThreadId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [pickerFor, setPickerFor] = useState<string | null>(null); // リアクション絵文字ピッカー表示中の msg id
   const feedRef = useRef<HTMLDivElement>(null);
 
   async function load() {
@@ -305,16 +296,6 @@ export default function DmPanel() {
     await load();
   }
 
-  async function toggleReaction(id: string, emoji: string) {
-    setPickerFor(null);
-    await fetch('/api/messages', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, toggleReaction: emoji }),
-    });
-    await load();
-  }
-
   // 1 件のメッセージ。自分専用なのでアバター/名前は出さず、各メッセージを
   // カード状に区切って境目を分かりやすくする。inThread=スレッドペイン内表示。
   function MessageRow({ msg, inThread }: { msg: Message; inThread?: boolean }) {
@@ -337,28 +318,6 @@ export default function DmPanel() {
             <MessageText text={msg.text} />
           )}
 
-          {msg.reactions && msg.reactions.length > 0 && (
-            <div className="reactions">
-              {msg.reactions.map((r) => (
-                <button
-                  key={r.emoji}
-                  className="reaction on"
-                  onClick={() => toggleReaction(msg.id, r.emoji)}
-                >
-                  <span>{r.emoji}</span>
-                  <span className="reaction-count">{r.count}</span>
-                </button>
-              ))}
-              <button
-                className="reaction add"
-                onClick={() => setPickerFor(msg.id)}
-                title="リアクション"
-              >
-                ＋
-              </button>
-            </div>
-          )}
-
           {!inThread && replies.length > 0 && (
             <button className="thread-summary" onClick={() => setOpenThreadId(msg.id)}>
               <span className="thread-ic">💬</span>
@@ -374,38 +333,17 @@ export default function DmPanel() {
         {!editing && (
           <div className="msg-actions">
             <div className="msg-actions-inner">
-              {pickerFor === msg.id ? (
-                <div className="emoji-picker">
-                  {QUICK_EMOJIS.map((e) => (
-                    <button key={e} onClick={() => toggleReaction(msg.id, e)}>
-                      {e}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <button title="リアクション" onClick={() => setPickerFor(msg.id)}>
-                    😊
-                  </button>
-                  {!inThread && (
-                    <button title="スレッドで返信" onClick={() => setOpenThreadId(msg.id)}>
-                      💬
-                    </button>
-                  )}
-                  <button
-                    title="編集"
-                    onClick={() => {
-                      setEditingId(msg.id);
-                      setPickerFor(null);
-                    }}
-                  >
-                    ✏️
-                  </button>
-                  <button title="削除" onClick={() => remove(msg.id)}>
-                    🗑️
-                  </button>
-                </>
+              {!inThread && (
+                <button title="スレッドで返信" onClick={() => setOpenThreadId(msg.id)}>
+                  💬
+                </button>
               )}
+              <button title="編集" onClick={() => setEditingId(msg.id)}>
+                ✏️
+              </button>
+              <button title="削除" onClick={() => remove(msg.id)}>
+                🗑️
+              </button>
             </div>
           </div>
         )}

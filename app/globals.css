@@ -23,7 +23,7 @@ body {
   background: var(--bg);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -62,7 +62,7 @@ textarea {
 
 /* ---- レイアウト ---- */
 .app {
-  max-width: 880px;
+  max-width: 80%;
   margin: 0 auto;
   padding: 24px 20px 80px;
 }
@@ -77,7 +77,7 @@ textarea {
 }
 
 .header h1 {
-  font-size: 18px;
+  font-size: 22px;
   font-family: var(--font-mono);
   font-weight: 600;
 }
@@ -104,7 +104,7 @@ textarea {
   color: var(--text-secondary);
   padding: 8px 14px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 17px;
   font-family: var(--font-mono);
 }
 
@@ -118,7 +118,7 @@ textarea {
   border-radius: 9px;
   background: #f85149;
   color: #fff;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 700;
   font-family: var(--font-sans);
   line-height: 17px;
@@ -155,7 +155,7 @@ textarea {
 
 .meta {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
 }
 
@@ -187,7 +187,7 @@ textarea {
   border-radius: 6px;
   padding: 8px 16px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 17px;
   align-self: flex-start;
 }
 
@@ -202,7 +202,7 @@ textarea {
   color: var(--text-secondary);
   border-radius: 6px;
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .btn-ghost:hover {
@@ -317,7 +317,7 @@ textarea {
 
 .post-title {
   font-weight: 600;
-  font-size: 15px;
+  font-size: 19px;
 }
 
 /* お気に入りの星ボタン */
@@ -325,7 +325,7 @@ textarea {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 22px;
   line-height: 1;
   padding: 2px 4px;
   cursor: pointer;
@@ -360,18 +360,18 @@ textarea {
 }
 
 .markdown h1 {
-  font-size: 22px;
+  font-size: 26px;
   margin: 0 0 12px;
 }
 
 .markdown h2 {
-  font-size: 17px;
+  font-size: 21px;
   margin: 20px 0 8px;
   color: var(--amber);
 }
 
 .markdown h3 {
-  font-size: 15px;
+  font-size: 19px;
   margin: 16px 0 6px;
 }
 
@@ -392,7 +392,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 1px 5px;
-  font-size: 12px;
+  font-size: 16px;
 }
 
 .markdown pre {
@@ -412,7 +412,7 @@ textarea {
 
 .empty {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 17px;
   padding: 20px 0;
   text-align: center;
 }
@@ -424,13 +424,13 @@ textarea {
   padding: 10px 14px;
   margin-bottom: 16px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 17px;
   line-height: 1.6;
 }
 
 .hint code {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 16px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -439,11 +439,11 @@ textarea {
 
 .error {
   color: #f85149;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .section-title {
-  font-size: 13px;
+  font-size: 17px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
   margin: 18px 0 10px;
@@ -452,7 +452,7 @@ textarea {
 }
 
 .date-section {
-  font-size: 14px;
+  font-size: 18px;
   font-family: var(--font-mono);
   color: var(--amber);
   margin: 22px 0 10px;
@@ -493,11 +493,11 @@ textarea {
 
 .dm-title {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 19px;
 }
 
 .dm-sub {
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -530,7 +530,7 @@ textarea {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  font-size: 11px;
+  font-size: 15px;
 }
 
 /* フィード */
@@ -558,7 +558,7 @@ textarea {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 2px 12px;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-secondary);
 }
@@ -590,7 +590,7 @@ textarea {
 }
 
 .msg-time {
-  font-size: 11px;
+  font-size: 15px;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }
@@ -623,44 +623,9 @@ textarea {
 }
 
 .msg-edited {
-  font-size: 11px;
+  font-size: 15px;
   color: var(--text-muted);
   margin-left: 4px;
-}
-
-/* リアクション */
-.reactions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 5px;
-}
-
-.reaction {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1px 8px;
-  font-size: 13px;
-  line-height: 20px;
-}
-
-.reaction.on {
-  border-color: #4ea1ff;
-  background: rgba(78, 161, 255, 0.12);
-}
-
-.reaction-count {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--text-secondary);
-}
-
-.reaction.add {
-  color: var(--text-secondary);
 }
 
 /* スレッド要約（フィード内） */
@@ -682,18 +647,18 @@ textarea {
 }
 
 .thread-ic {
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .thread-count {
   color: #4ea1ff;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 17px;
 }
 
 .thread-last {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 16px;
 }
 
 /* ホバーアクションバー */
@@ -720,24 +685,17 @@ textarea {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
-.msg-actions-inner button,
-.emoji-picker button {
+.msg-actions-inner button {
   background: transparent;
   border: none;
   border-radius: 6px;
   padding: 4px 6px;
-  font-size: 15px;
+  font-size: 19px;
   line-height: 1;
 }
 
-.msg-actions-inner button:hover,
-.emoji-picker button:hover {
+.msg-actions-inner button:hover {
   background: var(--bg-hover);
-}
-
-.emoji-picker {
-  display: flex;
-  gap: 2px;
 }
 
 /* メッセージ内インライン編集 */
@@ -792,7 +750,7 @@ textarea {
   border-radius: 5px;
   width: 26px;
   height: 26px;
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 700;
 }
 
@@ -825,7 +783,7 @@ textarea {
   border-radius: 6px;
   width: 30px;
   height: 30px;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -860,14 +818,14 @@ textarea {
 
 .thread-title {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 19px;
 }
 
 .thread-close {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 16px;
+  font-size: 20px;
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -891,12 +849,15 @@ textarea {
   gap: 10px;
   padding: 4px 16px;
   margin: 6px 0;
-  font-size: 12px;
+  font-size: 16px;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border);
 }
 
 @media (max-width: 720px) {
+  .app {
+    max-width: 100%;
+  }
   .dm {
     height: calc(100vh - 160px);
   }

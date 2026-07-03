@@ -33,18 +33,12 @@ export interface Task {
 }
 
 // Slack 風の自分宛 DM メッセージ。スレッドは parentId で表現する。
-export interface Reaction {
-  emoji: string;
-  count: number; // 自分専用なので実質 1（トグルで付け外し）
-}
-
 export interface Message {
   id: string;
   text: string;
   createdAt: string; // ISO8601
   editedAt?: string; // 編集時刻（あれば「編集済み」表示）
   parentId?: string; // セットされていればスレッド返信。未指定はトップレベル投稿。
-  reactions?: Reaction[];
 }
 
 export interface PostMeta {
