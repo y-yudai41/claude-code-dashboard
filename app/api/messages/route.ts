@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import { getMessages, saveMessages, type Message } from '@/lib/storage';
 
 export const runtime = 'nodejs';
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
     parentId = parent.parentId ?? parent.id;
   }
   const message: Message = {
-    id: String(Date.now()),
+    id: randomUUID(),
     text: body.text.trim(),
     createdAt: new Date().toISOString(),
     ...(parentId ? { parentId } : {}),

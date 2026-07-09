@@ -345,9 +345,24 @@ function summarize(transcript: string): Promise<string | null> {
 
 // ---- メタ（日ごとの署名: 変化なしの日の再要約を避ける） ----
 async function readMeta(): Promise<Record<string, string>> {
+  let raw: string;
   try {
-    return JSON.parse(await fs.readFile(META_FILE, 'utf-8'));
+    raw = await fs.readFile(META_FILE, 'utf-8');
+  } catch (err: unknown) {
+    // ファイルが無いときだけ空メタ。それ以外は握り潰さず投げる。
+    if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return {};
+    throw err;
+  }
+  try {
+    return JSON.parse(raw);
   } catch {
+    // 破損メタを空扱いにすると全日を再要約するだけで実害は小さいが、
+    // 一応壊れたファイルを退避してから空メタを返す（storage.ts と同方針）。
+    try {
+      await fs.rename(META_FILE, `${META_FILE}.corrupt-${Date.now()}`);
+    } catch {
+      /* ignore */
+    }
     return {};
   }
 }

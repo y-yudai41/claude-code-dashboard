@@ -131,6 +131,35 @@ textarea {
   color: var(--text-primary);
 }
 
+/* ---- 作業ログの検索 ---- */
+.log-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.log-controls .tabs {
+  margin-bottom: 0;
+}
+
+.log-search {
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
+  padding: 7px 12px;
+  font-size: 15px;
+}
+
+/* 検索一致部分のハイライト */
+mark.search-hit {
+  background: rgba(245, 158, 11, 0.28); /* --amber ベースの淡い下地 */
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
 .tab.active {
   background: var(--bg-surface);
   border-color: var(--border);

@@ -1,18 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { LogEntry } from '@/lib/types';
 
-interface LogEntry {
-  id: string;
-  title: string;
-  date: string;
-  project: string;
-  sessionId: string;
-  period: string;
-  body: string;
-  createdAt: string;
+// 検索語（小文字化済み）に一致する部分を <mark> で囲んで返す。
+// 大文字小文字は無視。query が空なら素のテキストをそのまま返す。
+function highlight(text: string, lowerQuery: string): ReactNode {
+  if (!lowerQuery) return text;
+  const lower = text.toLowerCase();
+  const parts: ReactNode[] = [];
+  let i = 0;
+  let k = 0;
+  while (i < text.length) {
+    const idx = lower.indexOf(lowerQuery, i);
+    if (idx === -1) {
+      parts.push(text.slice(i));
+      break;
+    }
+    if (idx > i) parts.push(text.slice(i, idx));
+    parts.push(
+      <mark key={k++} className="search-hit">
+        {text.slice(idx, idx + lowerQuery.length)}
+      </mark>,
+    );
+    i = idx + lowerQuery.length;
+  }
+  return parts;
 }
 
 // logs は date 降順で来る前提。連続する同一 date をセクションにまとめる。
@@ -40,6 +55,7 @@ export default function LogsPanel() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [fav, setFav] = useState<string[]>([]);
   const [favOnly, setFavOnly] = useState(false);
+  const [query, setQuery] = useState('');
   const started = useRef(false);
 
   async function loadCache() {
@@ -113,7 +129,15 @@ export default function LogsPanel() {
   }, []);
 
   const favCount = logs.filter((l) => fav.includes(l.id)).length;
-  const visible = favOnly ? logs.filter((l) => fav.includes(l.id)) : logs;
+  // 検索: title / project / body に対する部分一致（大文字小文字を無視）。
+  // お気に入り絞込と両立（AND）。
+  const q = query.trim().toLowerCase();
+  const matchesQuery = (l: LogEntry) =>
+    !q ||
+    l.title.toLowerCase().includes(q) ||
+    l.project.toLowerCase().includes(q) ||
+    l.body.toLowerCase().includes(q);
+  const visible = logs.filter((l) => (!favOnly || fav.includes(l.id)) && matchesQuery(l));
 
   return (
     <div>
@@ -125,13 +149,23 @@ export default function LogsPanel() {
       {error && <p className="error">{error}</p>}
 
       {logs.length > 0 && (
-        <div className="tabs" style={{ marginBottom: 16 }}>
-          <button
-            className={`tab${favOnly ? ' active' : ''}`}
-            onClick={() => setFavOnly((v) => !v)}
-          >
-            {favOnly ? `★ お気に入りのみ（${favCount}）` : `☆ お気に入り（${favCount}）`}
-          </button>
+        <div className="log-controls">
+          <div className="tabs">
+            <button
+              className={`tab${favOnly ? ' active' : ''}`}
+              onClick={() => setFavOnly((v) => !v)}
+            >
+              {favOnly ? `★ お気に入りのみ（${favCount}）` : `☆ お気に入り（${favCount}）`}
+            </button>
+          </div>
+          <input
+            type="search"
+            className="log-search"
+            placeholder="作業ログを検索（タイトル・プロジェクト・本文）"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            aria-label="作業ログを検索"
+          />
         </div>
       )}
 
@@ -141,7 +175,11 @@ export default function LogsPanel() {
           このタブを開いたときに自動で収集されます。
         </p>
       ) : visible.length === 0 ? (
-        <p className="empty">お気に入りの作業ログはありません。</p>
+        <p className="empty">
+          {q
+            ? `「${query.trim()}」に一致する作業ログはありません。`
+            : 'お気に入りの作業ログはありません。'}
+        </p>
       ) : (
         groupByDate(visible).map((group) => (
           <section key={group.date}>
@@ -156,10 +194,10 @@ export default function LogsPanel() {
                     <div>
                       {log.period && <div className="meta">{log.period}</div>}
                       <div className="post-title" style={{ marginTop: 4 }}>
-                        {log.title}
+                        {highlight(log.title, q)}
                       </div>
                       <div className="meta" style={{ marginTop: 4 }}>
-                        <span className="project">{log.project}</span>
+                        <span className="project">{highlight(log.project, q)}</span>
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0, alignItems: 'center' }}>

@@ -1,14 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
-
-interface Message {
-  id: string;
-  text: string;
-  createdAt: string;
-  editedAt?: string;
-  parentId?: string;
-}
+import type { Message } from '@/lib/types';
 
 // ---- 日時フォーマット（Slack 風） ----
 function fmtTime(iso: string): string {

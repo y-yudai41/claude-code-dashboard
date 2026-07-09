@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import { getAchievements, saveAchievements, type Achievement } from '@/lib/storage';
 
 export const runtime = 'nodejs';
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
     );
   }
   const item: Achievement = {
-    id: String(Date.now()),
+    id: randomUUID(),
     project: body.project.trim(),
     period: typeof body.period === 'string' ? body.period.trim() : '',
     body: body.body.trim(),

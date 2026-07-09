@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 import { getTasks, saveTasks, type Task } from '@/lib/storage';
 
 export const runtime = 'nodejs';
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
   const kind: Task['kind'] = body.kind === 'group' ? 'group' : 'task';
   const task: Task = {
-    id: String(Date.now()),
+    id: randomUUID(),
     title: body.title.trim(),
     done: false,
     createdAt: new Date().toISOString(),

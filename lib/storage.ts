@@ -1,5 +1,10 @@
 import { promises as fs } from 'fs';
 import path from 'path';
+import type { LogEntry, Task, Message, PostMeta, Achievement } from './types';
+
+// 型の正本は lib/types.ts。内部では import type で受けて使い、
+// 既存の「import { …, type X } from '@/lib/storage'」を壊さないよう同じ型を re-export する。
+export type { LogEntry, Task, Message, PostMeta, Achievement } from './types';
 
 // ローカルファイル保存のルート。process.cwd() = プロジェクトルート。
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -9,74 +14,50 @@ const TASKS_FILE = path.join(DATA_DIR, 'tasks.json');
 const ACHIEVEMENTS_FILE = path.join(DATA_DIR, 'achievements.json');
 const MESSAGES_FILE = path.join(DATA_DIR, 'messages.json');
 
-// ---- 型 ----
-// 作業ログは claude-notion-logger が Notion に書く形式と同一にする。
-// data/logs.json は Notion からの同期キャッシュとして使う（手動入力はしない）。
-export interface LogEntry {
-  id: string; // Notion ページ id（再同期時の重複防止キー）
-  title: string; // タイトル（セッションのテーマ名）
-  date: string; // 日付（YYYY-MM-DD）
-  project: string; // プロジェクト（作業ディレクトリ + git ブランチ）
-  sessionId: string; // SessionId
-  period: string; // 時間帯（例 09:51–18:29）
-  body: string; // 本文（Markdown 要約）
-  createdAt: string; // 収集時刻
-  msgCount?: number; // 内部用: 当日グループの再要約要否判定（表示には使わない）
-}
-
-export interface Task {
-  id: string;
-  title: string;
-  done: boolean;
-  createdAt: string; // ISO8601
-  kind?: 'task' | 'group'; // 'group' は複数タスクをまとめる見出し行。未指定は 'task'（後方互換）。
-}
-
-// Slack 風の自分宛 DM メッセージ。スレッドは parentId で表現する。
-export interface Message {
-  id: string;
-  text: string;
-  createdAt: string; // ISO8601
-  editedAt?: string; // 編集時刻（あれば「編集済み」表示）
-  parentId?: string; // セットされていればスレッド返信。未指定はトップレベル投稿。
-}
-
-export interface PostMeta {
-  slug: string;
-  title: string;
-  date: string; // YYYY-MM-DD（ファイル名先頭から推定）
-  preview: string;
-}
-
-// 成果（プロジェクト単位のサマリ）。毎日のセッションログとは別物で、
-// 「このプロジェクトで全体として何をやったか」を手動指示で書き残す。
-export interface Achievement {
-  id: string;
-  project: string; // プロジェクト名（一覧の見出し）
-  period: string; // 期間（例 2026 Q1–Q2）。任意なので空文字可。
-  body: string; // 本文（Markdown 要約）
-  createdAt: string; // ISO8601
-}
-
 // ---- 汎用 JSON 読み書き ----
 async function ensureDir(dir: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true });
 }
 
 async function readJson<T>(file: string, fallback: T): Promise<T> {
+  let raw: string;
   try {
-    const raw = await fs.readFile(file, 'utf-8');
-    return JSON.parse(raw) as T;
+    raw = await fs.readFile(file, 'utf-8');
   } catch (err: unknown) {
-    // ファイルが無ければ初期値。それ以外（破損等）も初期値で落とさない。
+    // ファイルが無いときだけ初期値を返す。
     if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return fallback;
+    throw err;
+  }
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    // 破損（パース不能）を黙って空扱いにすると、次の保存で全データが上書き消失する。
+    // 壊れたファイルを退避（.corrupt-<timestamp>）して保全した上で初期値を返す。
+    const backup = `${file}.corrupt-${Date.now()}`;
+    try {
+      await fs.rename(file, backup);
+      console.error(`[storage] 破損した JSON を検知: ${file} → ${backup} に退避しました`);
+    } catch {
+      /* 退避に失敗しても、少なくとも破損ファイルを上書きしないよう初期値を返す */
+    }
     return fallback;
   }
 }
 
 async function writeJson(file: string, data: unknown): Promise<void> {
   await ensureDir(path.dirname(file));
-  await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf-8');
+  // 原子書き込み: 同一ディレクトリ内の一時ファイルに書いてから rename で置き換える。
+  // rename は同一ファイルシステム内なら原子的なので、書き込み途中でクラッシュしても
+  // 本ファイルが半端な JSON に壊れない（一時ファイルが残るだけ）。
+  const tmp = `${file}.tmp-${Date.now()}`;
+  await fs.writeFile(tmp, JSON.stringify(data, null, 2), 'utf-8');
+  try {
+    await fs.rename(tmp, file);
+  } catch (err) {
+    // rename 失敗時は中途半端な一時ファイルを掃除してからエラーを投げる。
+    await fs.rm(tmp, { force: true }).catch(() => {});
+    throw err;
+  }
 }
 
 // ---- ログ ----

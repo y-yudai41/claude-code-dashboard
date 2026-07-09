@@ -3,14 +3,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-interface Achievement {
-  id: string;
-  project: string;
-  period: string;
-  body: string;
-  createdAt: string;
-}
+import type { Achievement } from '@/lib/types';
 
 export default function AchievementsPanel() {
   const [items, setItems] = useState<Achievement[]>([]);

@@ -3,13 +3,7 @@
 import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
-interface PostMeta {
-  slug: string;
-  title: string;
-  date: string;
-  preview: string;
-}
+import type { PostMeta } from '@/lib/types';
 
 // 「メインタイトル — サブタイトル」形式から、一覧表示用にメイン部分だけ取り出す。
 // em/en ダッシュ（— –）区切りのみ対象（通常のハイフンは温存）。全文はクリックで見る。
