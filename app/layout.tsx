@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import IntroSplash from '@/components/IntroSplash';
 
 export const metadata: Metadata = {
   title: 'Claude Code Dashboard',
@@ -10,6 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <body>
+        <IntroSplash />
         <div className="app">
           <header className="header">
             <span className="dot" />
